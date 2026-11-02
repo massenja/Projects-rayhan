@@ -30,7 +30,26 @@ class AdminProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'teknologi' => 'required',
+            'status' => 'required|in:selesai,In Progress',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+        ]);
+
+        $imagePath = time() . '_' . $request->file('image')->getClientOriginalName();
+        $request->file('image')->move(public_path('images'), $imagePath);
+
+        Project::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'teknologi' => $validated['teknologi'],
+            'image' => $imagePath,
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('admin.project.index')->with('success', 'Project berhasil ditambahkan.');
     }
 
     /**
@@ -47,6 +66,8 @@ class AdminProjectController extends Controller
     public function edit(string $id)
     {
         //
+        $project = Project::findOrFail($id);
+        return view('admin.project.edit', compact('project'));
     }
 
     /**
@@ -55,6 +76,36 @@ class AdminProjectController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        request()->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'teknologi' => 'required',
+            'status' => 'required|in:selesai,In Progress',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10048',
+        ]);
+
+        $project = Project::findOrFail($id);
+        $imagePath = $project->image; // Default to existing image path
+
+        if ($request->hasFile('image')) {
+            // hapus gambar lama kalo ada wok
+        //     if ($project->image && file_exists(public_path('images/' . $project->image))) {
+        //         unlink(public_path('images/' . $project->image));
+        //     }
+
+            $imagePath = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path('images'), $imagePath);
+            $project->image = $imagePath;
+        }
+        $project->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'teknologi' => $request->teknologi,
+            "image" => $imagePath,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('admin.project.index')->with('success', 'Project berhasil diubah.');
     }
 
     /**
@@ -64,8 +115,8 @@ class AdminProjectController extends Controller
     {
         //
         $project = Project::findOrFail($id);
-        if ($project->image && file_exists(public_path('image/' . $project->image))) {
-            unlink(public_path('image/' . $project->image));
+        if ($project->image && file_exists(public_path('images/' . $project->image))) {
+            unlink(public_path('images/' . $project->image));
         }
         $project->delete();
         return redirect()->route('admin.project.index')->with('success', 'Project berhasil dihapus.');
