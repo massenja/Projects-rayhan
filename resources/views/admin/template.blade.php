@@ -15,6 +15,7 @@
     body {
         background-color: #f8f9fa;
     }
+
     .admin-sidebar {
         width: 250px;
         background-color: #343a40;
@@ -25,29 +26,35 @@
         left: 0;
         padding-top: 20px;
     }
+
     .admin-sidebar .nav-link {
         color: #fff;
         padding: 10px 20px;
     }
+
     .admin-sidebar .nav-link:hover {
         background-color: #495057;
         color: #fff;
     }
+
     .admin-content {
         margin-left: 250px;
         padding: 20px;
     }
+
     @media (max-width: 768px) {
         .admin-sidebar {
             width: 100%;
             position: relative;
             height: auto;
         }
+
         .admin-content {
             margin-left: 0;
         }
     }
 </style>
+
 <body>
     <div class="admin-sidebar shadow">
         <h4 class="text-center fw-bold text-white pb-3 border-bottom">
@@ -61,19 +68,24 @@
             <li class="nav-item">
                 <a class="nav-link text-white" href="{{ route('admin.project.index') }}">Projects</a>
             </li>
+            <li>
+                <div class="p-3 border-top -border-secondary">
+                    <a href="{{ route('logout') }}" class="btn btn-danger w-100">Logout</a>
+                </div>
+            </li>
         </ul>
     </div>
 
     <div class="admin-content">
         <div class="d-flex justify-content-between align-items-center p-3 mb-4 border-bottom bg-white rounded shadow-sm">
             <h3>admin dashboard</h3>
-            <span class="text-muted">Halo, Admin!</span>
+            <span class="text-muted">Halo, {{ Auth::user()->name }}!</span>
         </div>
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         @endif
         @yield('content')
     </div>
