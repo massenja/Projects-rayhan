@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Project;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class AdminProjectController extends Controller
@@ -89,9 +90,9 @@ class AdminProjectController extends Controller
 
         if ($request->hasFile('image')) {
             // hapus gambar lama kalo ada wok
-        //     if ($project->image && file_exists(public_path('images/' . $project->image))) {
-        //         unlink(public_path('images/' . $project->image));
-        //     }
+            if ($project->image && file_exists(public_path('images/' . $project->image))) {
+                unlink(public_path('images/' . $project->image));
+            }
 
             $imagePath = time() . '_' . $request->file('image')->getClientOriginalName();
             $request->file('image')->move(public_path('images'), $imagePath);
@@ -120,5 +121,16 @@ class AdminProjectController extends Controller
         }
         $project->delete();
         return redirect()->route('admin.project.index')->with('success', 'Project berhasil dihapus.');
+    }
+
+    public function exportPdf()
+    {
+        $projects = Project::all();
+        $pdf = Pdf::loadView('admin.project.pdf', compact('projects'))
+            ->setPaper('a4', 'landscape')
+            ->setOption(['chroot' => public_path(),
+            'isRemoteEnabled' => true]);
+
+        return $pdf->stream('projects.pdf');
     }
 }
